@@ -12,14 +12,14 @@ DATABASE_PATH = Path.cwd() / DATABASE_NAME
 SAGE_MAPPING_FILE = "sage_gls_mapping.json"
 SAGE_MAPPING_PATH = Path.cwd() / SAGE_MAPPING_FILE
 
-# Expected Excel columns
+# Expected Excel columns based on your provided list
 EXPECTED_COLUMNS = [
-    'SiteID', 'ChargeDescID', 'sChgCategory', 'sChgDesc', 
-    'sDefAcctCode', 'sAcctCode', 'Price', 'Charge', 'Discount',
-    'ChargeTax1', 'ChargeTax2', 'ChargeTotal', 'Payment',
-    'PaymentTax1', 'PaymentTax2', 'PaymentTotal', 'Credit',
+    'SiteID', 'ChargeDescID', 'sChgCategory', 'sChgDesc',
+    'sDefAcctCode', 'sAcctCode', 'Chg_dDisabled', 'Chg_dDeleted', 'Price',
+    'Charge', 'Discount', 'ChargeTax1', 'ChargeTax2', 'ChargeTotal',
+    'Payment', 'PaymentTax1', 'PaymentTax2', 'PaymentTotal', 'Credit',
     'CreditTax1', 'CreditTax2', 'CreditTotal', 'TotalCost',
-    'iCount', 'dcPercent', 'Chg_dDisabled'
+    'iCount', 'dcPercent'
 ]
 
 # Numeric columns for data processing
@@ -27,7 +27,7 @@ NUMERIC_COLUMNS = [
     'Price', 'Charge', 'Discount', 'ChargeTax1', 'ChargeTax2',
     'ChargeTotal', 'Payment', 'PaymentTax1', 'PaymentTax2',
     'PaymentTotal', 'Credit', 'CreditTax1', 'CreditTax2',
-    'CreditTotal', 'TotalCost', 'iCount', 'dcPercent', 'Chg_dDisabled'
+    'CreditTotal', 'TotalCost', 'iCount', 'dcPercent', 'Chg_dDisabled', 'Chg_dDeleted'
 ]
 
 # Default Sage GLS mapping
