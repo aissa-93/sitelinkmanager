@@ -1,0 +1,19 @@
+{
+    "account_mappings": {
+        "revenue_accounts": {
+            "rental_income": "4000",
+            "late_fees": "4010",
+            "administrative_fees": "4020"
+        },
+        "tax_accounts": {
+            "sales_tax": "2200",
+            "county_tax": "2210"
+        }
+    },
+    "category_mappings": {
+        "Rent": "4000",
+        "Late Fee": "4010",
+        "Admin Fee": "4020",
+        "Insurance": "4030"
+    }
+}
