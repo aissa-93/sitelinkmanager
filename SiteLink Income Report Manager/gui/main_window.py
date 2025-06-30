@@ -18,22 +18,16 @@ class SiteLinkGUI:
     
     def create_widgets(self):
         """Create and arrange GUI widgets"""
-        # Main frame
         main_frame = ttk.Frame(self.root, padding="10")
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
-        # Title
         title_label = ttk.Label(main_frame, text=WINDOW_TITLE, 
                                font=('Arial', 16, 'bold'))
         title_label.grid(row=0, column=0, columnspan=3, pady=(0, 20))
         
-        # Import section
         self.create_import_section(main_frame)
+        self.create_data_display_section(main_frame)
         
-        # Summary section
-        self.create_summary_section(main_frame)
-        
-        # Configure grid weights
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(2, weight=1)
     
@@ -55,31 +49,30 @@ class SiteLinkGUI:
         ttk.Button(import_frame, text="Select & Import Excel File", 
                   command=self.import_file).grid(row=0, column=4, padx=(10, 0))
     
-    def create_summary_section(self, parent):
-        """Create summary display section"""
-        summary_frame = ttk.LabelFrame(parent, text="Financial Summary", padding="10")
-        summary_frame.grid(row=2, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+    def create_data_display_section(self, parent):
+        """Create data display section"""
+        data_frame = ttk.LabelFrame(parent, text="Stored Data Viewer", padding="10")
+        data_frame.grid(row=2, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
         
-        # Summary controls
-        controls_frame = ttk.Frame(summary_frame)
+        controls_frame = ttk.Frame(data_frame)
         controls_frame.grid(row=0, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
         
-        ttk.Button(controls_frame, text="View Summary", 
-                  command=self.view_summary).grid(row=0, column=0, padx=(0, 10))
+        ttk.Button(controls_frame, text="View All Stored Data", 
+                  command=self.view_all_data).grid(row=0, column=0, padx=(0, 10))
         ttk.Button(controls_frame, text="Export to Sage GLS", 
                   command=self.export_sage).grid(row=0, column=1, padx=(0, 10))
         
-        # Results text area
-        self.results_text = tk.Text(summary_frame, height=20, width=70)
-        scrollbar = ttk.Scrollbar(summary_frame, orient="vertical", command=self.results_text.yview)
-        self.results_text.configure(yscrollcommand=scrollbar.set)
+        self.results_text = tk.Text(data_frame, height=20, width=80, wrap=tk.NONE) # Changed width and wrap
+        x_scrollbar = ttk.Scrollbar(data_frame, orient="horizontal", command=self.results_text.xview)
+        y_scrollbar = ttk.Scrollbar(data_frame, orient="vertical", command=self.results_text.yview)
+        self.results_text.configure(yscrollcommand=y_scrollbar.set, xscrollcommand=x_scrollbar.set)
         
         self.results_text.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        scrollbar.grid(row=1, column=1, sticky=(tk.N, tk.S))
+        y_scrollbar.grid(row=1, column=1, sticky=(tk.N, tk.S))
+        x_scrollbar.grid(row=2, column=0, sticky=(tk.W, tk.E)) # Added horizontal scrollbar
         
-        # Configure grid weights
-        summary_frame.columnconfigure(0, weight=1)
-        summary_frame.rowconfigure(1, weight=1)
+        data_frame.columnconfigure(0, weight=1)
+        data_frame.rowconfigure(1, weight=1)
     
     def import_file(self):
         """Handle file import"""
@@ -99,47 +92,30 @@ class SiteLinkGUI:
                 )
                 self.processor.store_data(df)
                 
-                disabled_count = df['Chg_dDisabled'].sum()
                 messagebox.showinfo("Success", 
-                    f"Successfully imported {len(df)} records for {self.month_var.get()}/{self.year_var.get()}\n"
-                    f"Disabled charges: {disabled_count}")
+                    f"Successfully imported {len(df)} records for {self.month_var.get()}/{self.year_var.get()}")
                 
-                self.view_summary()
+                self.view_all_data()
                 
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to import file:\n{str(e)}")
     
-    def view_summary(self):
-        """Display financial summary"""
+    def view_all_data(self):
+        """Display all raw data from the database"""
         try:
-            summary_df = self.processor.get_financial_summary()
+            all_data_df = self.processor.get_all_data()
             
             self.results_text.delete(1.0, tk.END)
             
-            if summary_df.empty:
-                self.results_text.insert(tk.END, "No data available. Please import some reports first.")
+            if all_data_df.empty:
+                self.results_text.insert(tk.END, "No data available. Please import a report first.")
                 return
             
-            # Display summary
-            self.results_text.insert(tk.END, "FINANCIAL SUMMARY BY MONTH AND CATEGORY\n")
-            self.results_text.insert(tk.END, "=" * 60 + "\n\n")
-            
-            for _, row in summary_df.iterrows():
-                self.results_text.insert(tk.END, 
-                    f"Month/Year: {row['report_month']}/{row['report_year']}\n"
-                    f"Category: {row['sChgCategory']}\n"
-                    f"Account Code: {row['sAcctCode']}\n"
-                    f"Total Charges: ${row['total_charges']:,.2f}\n"
-                    f"Total Payments: ${row['total_payments']:,.2f}\n"
-                    f"Total Credits: ${row['total_credits']:,.2f}\n"
-                    f"Net Total: ${row['net_total']:,.2f}\n"
-                    f"Transactions: {row['transaction_count']}\n"
-                    f"Disabled Charges: {row['disabled_charges']}\n"
-                    f"{'-' * 40}\n\n"
-                )
+            # Display the raw data as a string
+            self.results_text.insert(tk.END, all_data_df.to_string())
             
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to load summary:\n{str(e)}")
+            messagebox.showerror("Error", f"Failed to load data:\n{str(e)}")
     
     def export_sage(self):
         """Export data for Sage GLS"""
@@ -156,11 +132,10 @@ class SiteLinkGUI:
                 messagebox.showwarning("Warning", "No data available for selected month/year")
                 return
             
-            # Save to CSV
             filename = f"sage_export_{self.month_var.get()}_{self.year_var.get()}.csv"
             sage_df.to_csv(filename, index=False)
             
-            messagebox.showinfo("Success", f"Sage GLS export saved as: {filename}\n(Disabled charges excluded)")
+            messagebox.showinfo("Success", f"Sage GLS export saved as: {filename}")
             
         except Exception as e:
             messagebox.showerror("Error", f"Failed to export for Sage:\n{str(e)}")
